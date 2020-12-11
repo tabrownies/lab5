@@ -9,21 +9,27 @@
             <p class="photoDate">{{formatDate(photo.created)}}</p>
         </div>
         <div class="addComment" v-show="this.$root.$data.user!==null">
+            <h2>Add a Comment!</h2>
             <textarea v-model="commentText">
             </textarea>
             <button @click="addComment">
                 Comment
             </button>
         </div>
-        
+
         <div class="comments">
-            <div  v-for="comment in comments" :key="comment._id" class="comment">
+            <h2>Comments</h2>
+            <div v-for="comment in comments" :key="comment._id" class="comment">
                 <p>{{comment.text}}</p>
-                <p>{{comment.user.firstName}} {{comment.user.lastName}}</p>
+                <div class="commentInfo">
+                    <p>{{comment.user.firstName}} {{comment.user.lastName}}</p>
+                    <p>{{formatDate(comment.created)}}</p>
+                </div>
+
             </div>
-            
+
         </div>
-        
+
     </div>
 </template>
 <script>
@@ -41,7 +47,7 @@
         },
         async created() {
             this.id = this.$route.params.id;
-            
+
             await this.getPhoto();
             await this.getComments();
         },
@@ -64,7 +70,7 @@
                 try {
                     let responce = await axios.get(`/api/comments/${this.photo._id}`);
                     this.comments = responce.data;
-                } catch(error){
+                } catch (error) {
                     console.log(error);
                 }
                 console.log(this.comments);
@@ -79,12 +85,20 @@
                 } catch (error) {
                     console.log(error);
                 }
+                this.commentText = '';
                 this.getComments();
             }
         }
     }
 </script>
 <style scoped>
+    .wrapper {
+        padding-top: 150px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
     .photoInfo {
         display: flex;
         justify-content: space-between;
@@ -104,8 +118,43 @@
         margin: 0px;
     }
 
+    .addComment {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .addComment h2 {
+        font-size: 20px;
+        ;
+    }
+
     textarea {
-        height: 200px;
-        width: 200px;
+        height: 100px;
+        width: 100%;
+    }
+
+    .addComment button {
+        margin: 5px;
+    }
+
+    .comments {
+        width: 100%;
+    }
+    .comments h2{
+        font-size:20px;
+    }
+    .comment {
+        margin: 10px;
+        font-size:20px;
+    }
+    .comment p{
+        margin:5px;
+    }
+    .commentInfo{
+        display:flex;
+        justify-content: space-between;
+        font-size: 15px;
     }
 </style>
