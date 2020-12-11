@@ -8,11 +8,22 @@
             </div>
             <p class="photoDate">{{formatDate(photo.created)}}</p>
         </div>
-        <div class="comments">
-            <p v-for="comment in comments" :key="comment">
-                
-            </p>
+        <div class="addComment" v-show="this.$root.$data.user!==null">
+            <textarea v-model="commentText">
+            </textarea>
+            <button @click="addComment">
+                Comment
+            </button>
         </div>
+        
+        <div class="comments">
+            <div  v-for="comment in comments" :key="comment._id" class="comment">
+                <p>{{comment.text}}</p>
+                <p>{{comment.user.firstName}} {{comment.user.lastName}}</p>
+            </div>
+            
+        </div>
+        
     </div>
 </template>
 <script>
@@ -23,21 +34,22 @@
         data: () => {
             return {
                 id: String,
-                photo: {},
-                comments:Array,
+                photo: Object,
+                comments: Array,
+                commentText: '',
             }
         },
-        created() {
+        async created() {
             this.id = this.$route.params.id;
-            this.getPhoto();
-            console.log(this.photo);
+            
+            await this.getPhoto();
+            await this.getComments();
         },
         methods: {
             async getPhoto() {
                 try {
                     let response = await axios.get(`/api/photos/${this.id}`);
                     this.photo = response.data;
-                    console.log(this.photo);
                 } catch (error) {
                     this.error = error.response.data.message;
                 }
@@ -47,16 +59,32 @@
                     return moment(date).fromNow();
                 else
                     return moment(date).format('d MMMM YYYY');
+            },
+            async getComments() {
+                try {
+                    let responce = await axios.get(`/api/comments/${this.photo._id}`);
+                    this.comments = responce.data;
+                } catch(error){
+                    console.log(error);
+                }
+                console.log(this.comments);
+            },
+            async addComment() {
+                try {
+                    axios.post('/api/comments', {
+                        user: this.$root.$data.user,
+                        photo: this.photo,
+                        text: this.commentText,
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
+                this.getComments();
             }
         }
     }
 </script>
 <style scoped>
-    .image{
-        position: relative;
-        top:150px;
-        width:80%
-    }
     .photoInfo {
         display: flex;
         justify-content: space-between;
@@ -74,5 +102,10 @@
 
     p {
         margin: 0px;
+    }
+
+    textarea {
+        height: 200px;
+        width: 200px;
     }
 </style>
