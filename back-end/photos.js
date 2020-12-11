@@ -77,6 +77,18 @@ router.get("/all", async (req, res) => {
         return res.sendStatus(500);
     }
 });
+router.get('/:id', async (req, res)=>{
+    console.log(req.params.id);
+    try {
+        let photo = await Photo.findOne({
+            _id: req.params.id,
+        }).populate('user');
+        return res.send(photo);
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
+})
 module.exports = {
     model: Photo,
     routes: router,
